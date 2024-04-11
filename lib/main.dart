@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         await validateLikes(dio);
         var commentsResponse = await validateComments(dio);
-        await validateFollowed(dio, commentsResponse);
+        // await validateFollowed(dio, commentsResponse);
 
         setState(() {
           _isLoading = false;
@@ -142,8 +142,15 @@ class _MyHomePageState extends State<MyHomePage> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          content: Text(
+            error.toString(),
+          ),
+        ),
+      );
+      print(error.toString());
     }
   }
 
