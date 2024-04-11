@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_scrapper/models/comments_response.dart';
 import 'package:instagram_scrapper/models/followers_response.dart';
+import 'package:instagram_scrapper/models/following_response.dart';
 import 'package:instagram_scrapper/models/likes_response.dart';
 
 void main() {
@@ -55,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> validateLikes(Dio dio) async {
+    print("Validando me gusta...");
     final response = await dio.get(
         'https://instagram-scraper-api2.p.rapidapi.com/v1/likes',
         queryParameters: {
@@ -73,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<CommentsResponse> validateComments(Dio dio) async {
+    print("Validando comentarios...");
     final response = await dio.get(
         'https://instagram-scraper-api2.p.rapidapi.com/v1/comments',
         queryParameters: {
@@ -93,21 +96,49 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> validateFollowed(
       Dio dio, CommentsResponse _commentsResponse) async {
+    print("Validando seguidores...");
     final response = await dio.get(
-        'https://instagram-scraper-api2.p.rapidapi.com/v1/followers',
+        'https://instagram-scraper-api2.p.rapidapi.com/v1/following',
         queryParameters: {
-          "username_or_id_or_url":
-              _commentsResponse.data!.additionalData!.caption!.user!.username!,
+          "username_or_id_or_url": _instgramUser.value.text,
           "amount": 1000,
         });
     var likeResponse =
-        FollowersResponse.fromJson(response.data as Map<String, dynamic>);
+        FollowingResponse.fromJson(response.data as Map<String, dynamic>);
     if (likeResponse.data != null) {
-      if (likeResponse.data!.items!
-          .any((element) => element.username! == _instgramUser.value.text)) {
+      if (likeResponse.data!.items!.any((element) =>
+          element.username! ==
+          _commentsResponse.data!.additionalData!.caption!.user!.username!)) {
         setState(() {
           followed = true;
         });
+      } else {
+        if (likeResponse.paginationToken != null) {
+          var paginationToken = likeResponse.paginationToken;
+          while (paginationToken != null) {
+            print("Validando seguidores...");
+            final response = await dio.get(
+                'https://instagram-scraper-api2.p.rapidapi.com/v1/following',
+                queryParameters: {
+                  "username_or_id_or_url": _instgramUser.value.text,
+                  "amount": 1000,
+                  "pagination_token": paginationToken
+                });
+            var followingResponse = FollowingResponse.fromJson(
+                response.data as Map<String, dynamic>);
+            if (likeResponse.data!.items!.any((element) =>
+                element.username! ==
+                _commentsResponse
+                    .data!.additionalData!.caption!.user!.username!)) {
+              setState(() {
+                followed = true;
+              });
+              paginationToken = null;
+            } else {
+              paginationToken = followingResponse.paginationToken;
+            }
+          }
+        }
       }
     }
   }
@@ -131,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         await validateLikes(dio);
         var commentsResponse = await validateComments(dio);
-        // await validateFollowed(dio, commentsResponse);
+        await validateFollowed(dio, commentsResponse);
 
         setState(() {
           _isLoading = false;
