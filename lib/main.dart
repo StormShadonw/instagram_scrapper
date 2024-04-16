@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_scrapper/env.dart';
 import 'package:instagram_scrapper/models/comments_response.dart';
 import 'package:instagram_scrapper/models/followers_response.dart';
 import 'package:instagram_scrapper/models/following_response.dart';
@@ -155,10 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
           _isLoading = true;
         });
         final dio = Dio();
-        dio.options.headers['X-RapidAPI-Key'] =
-            'f4c2ad54c1mshd1d71560a007e79p14955ajsnec9360071e01';
-        dio.options.headers['X-RapidAPI-Host'] =
-            'instagram-scraper-api2.p.rapidapi.com';
+        dio.options.headers['X-RapidAPI-Key'] = Env.RapidAPIKey;
+        dio.options.headers['X-RapidAPI-Host'] = Env.RapidApiHost;
 
         await validateLikes(dio);
         var commentsResponse = await validateComments(dio);
