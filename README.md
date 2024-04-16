@@ -26,6 +26,8 @@ The project has the objective of validating that a certain Instagram user has ca
 
 - Flutter SDK installed
 - Emulator or physical device to test the application
+- Need to implement envied [click here for documentation](https://pub.dev/packages/envied)
+- For verify the following step the user profile needs to be public.
 
 ## Facility
 
